@@ -1,17 +1,35 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+  <div class="container mx-auto flex justify-center">
+    <div>
+      <p class="list-title flex justify-start">现在流行 - 电视剧</p>
+      <popular-series :list="list" />
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import { defineComponent, ref, onMounted } from "vue";
+import axios from "axios";
+import PopularSeries from "./components/PopularSeries.vue";
 
 export default defineComponent({
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
+    PopularSeries,
+  },
+  setup() {
+    const popularSeries = ref([]);
+    const getPopular = async () => {
+      const response = await axios.get(
+        "https://imdb-api.com/en/API/MostPopularTVs/k_3at9681x"
+      );
+      popularSeries.value = response.data.items.slice(0, 8);
+    };
+    onMounted(getPopular);
+    return {
+      list: popularSeries,
+    };
+  },
 });
 </script>
 
@@ -23,5 +41,11 @@ export default defineComponent({
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+.list-title {
+  font-weight: 400;
+  font-size: 18px;
+  margin:16px 0;
 }
 </style>
