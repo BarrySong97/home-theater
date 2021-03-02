@@ -1,8 +1,7 @@
 <template>
-  <div class="item flex justify-end flex-col" :style="bgStyle">
-    <div class="item-info">
-      <p class="full-title">{{ fullTile }}</p>
-    </div>
+  <div class="flex flex-col card">
+    <div class="item rounded-md" :style="bgStyle"></div>
+    <p class="full-title absolute text-center">{{ fullTitle }}</p>
   </div>
 </template>
 
@@ -19,7 +18,7 @@ export default defineComponent({
       type: String,
       require: true,
     },
-    fullTile: {
+    fullTitle: {
       type: String,
       require: true,
     },
@@ -42,31 +41,34 @@ export default defineComponent({
 
 <style scoped>
 .item {
-  height: 200px;
-  width: 160px;
-  border-radius: 10px;
+  height: 220px;
+  width: 150px;
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
   cursor: pointer;
-}
-
-.item-info {
-  margin-bottom: 8px;
-  transform: translateY(100px);
-  transition: transform 0.5s linear;
+  z-index: 1;
+  transition: transform 0.4s cubic-bezier(0.37, 0.75, 0.61, 1.05);
 }
 
 .full-title {
+  width: 150px;
+  transform: translateY(140px);
+  z-index: 0;
+  color: black;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.37, 0.75, 0.61, 1.05);
+}
+
+.card:hover .full-title {
+  transform: translateY(120px);
+  z-index: 1;
   color: white;
 }
 
-.item:hover .item-info {
-  transform: translateY(-16px);
-}
-
-.item:hover {
+.card:hover .item {
   background-color: rgba(0, 0, 0, 0.4);
   background-blend-mode: multiply;
+  transform: translateY(-16px);
 }
 </style>
