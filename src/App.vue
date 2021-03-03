@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div @click="() => bottomPopupOpen = !bottomPopupOpen">
     <navbar />
 
     <main class="container mx-auto flex justify-center pl-8 pr-8 pt-16">
@@ -10,7 +10,7 @@
           </p>
           <popular-list>
             <item-card
-              @click="onClick(column.id, column.image)"
+              @click="onClick(column.id, column.image, `series`)"
               v-for="column in seriesList"
               :key="column.id"
               :id="column.id"
@@ -27,7 +27,6 @@
           </p>
           <popular-list>
             <item-card
-              @click="onClick(column.id)"
               v-for="column in moivesList"
               :key="column.id"
               :id="column.id"
@@ -44,7 +43,7 @@
           </p>
           <popular-list>
             <item-card
-              @click="onClick"
+              @click="onClick(column.id, column.image, `anime`)"
               v-for="column in animesList"
               :key="column.id"
               :id="column.id"
@@ -57,14 +56,19 @@
         </div>
       </div>
     </main>
-    <bottom-popup
-      :director="itemDetail.director"
-      :writer="itemDetail.writer"
-      :actor="itemDetail.actors"
-      :poster="itemDetail.poster"
-      :title="itemDetail.title"
-      :wiki="itemDetail.wiki"
-    />
+    <div
+      :class="{ modalDisplay: bottomPopupOpen, modalClose: !bottomPopupOpen }"
+      class="w-full"
+    >
+      <bottom-popup
+        :director="itemDetail.director"
+        :writer="itemDetail.writer"
+        :actors="itemDetail.actors"
+        :poster="itemDetail.poster"
+        :title="itemDetail.title"
+        :wiki="itemDetail.wiki"
+      />
+    </div>
   </div>
 </template>
 
@@ -75,10 +79,13 @@ import PopularList, { PopularListProps } from "./components/PopularList.vue";
 import Navbar from "./components/Navbar.vue";
 import ItemCard from "./components/ItemCard.vue";
 import BottomPopup from "./components/BottomPopup.vue";
-interface Cast {
+interface ItemDetail {
   director: string;
   writer: string;
   actors: string[];
+  poster: string;
+  title: string;
+  wiki: string;
 }
 
 export default defineComponent({
@@ -91,13 +98,21 @@ export default defineComponent({
   },
   data() {
     return {
-      itemDetail: {},
+      itemDetail: {
+        director: "",
+        writer: "",
+        actors: [],
+        poster: "",
+        title: "",
+        wiki: "",
+      } as ItemDetail,
+      bottomPopupOpen: false,
     };
   },
   setup() {
     const popularSeries = ref<PopularListProps[]>([]);
-    const popularMoives = ref([]);
-    const popularAnimes = ref([]);
+    const popularMoives = ref<PopularListProps[]>([]);
+    const popularAnimes = ref<PopularListProps[]>([]);
     const getPopular = async () => {
       const seriesResponse = await axios.get(
         "https://imdb-api.com/en/API/MostPopularTVs/k_3at9681x"
@@ -111,13 +126,15 @@ export default defineComponent({
       popularSeries.value = seriesResponse.data.items.slice(0, 8);
 
       popularMoives.value = moivesResponse.data.items.slice(0, 8);
-      popularAnimes.value = animeResponse.data.top.slice(0, 8).map((v: any) => {
-        return {
-          id: `${v.mal_id}`,
-          fullTitle: v.title,
-          image: v.image_url,
-        };
-      });
+      popularAnimes.value = animeResponse.data.top
+        .slice(0, 8)
+        .map((v: { mal_id: string; title: string; image_url: string }) => {
+          return {
+            id: `${v.mal_id}`,
+            fullTitle: v.title,
+            image: v.image_url,
+          };
+        });
     };
     onMounted(getPopular);
 
@@ -128,24 +145,45 @@ export default defineComponent({
     };
   },
   methods: {
-    onClick(id: string, poster: string) {
-      const getFullInfo = async () => {
-        const castResponse = await axios.get(
-          `https://imdb-api.com/en/API/FullCast/k_3at9681x/${id}`
-        );
-        const wikiResponse = await axios.get(
-          `https://imdb-api.com/zh/API/Wikipedia/k_3at9681x/${id}`
-        );
+    onClick(id: string, poster: string, type: string) {
+      if (type === "anime") {
+        const getFullInfo = async () => {
+          const fullResponse = await axios.get(
+            `https://api.jikan.moe/v3/anime/${id}`
+          );
 
-        this.itemDetail = {
-          director: castResponse.data.directors.items[0].name,
-          writer: castResponse.data.writers.items[0].name,
-          actors: castResponse.data.actors.slice(0, 5),
-          wiki: wikiResponse.data.plotShort.plainText,
-          poster,
+          this.itemDetail.wiki = fullResponse.data.synopsis.substring(0, 800);
+          this.itemDetail.poster = poster;
+          this.bottomPopupOpen = true;
         };
-      };
-      getFullInfo();
+        getFullInfo();
+      } else {
+        const getFullInfo = async () => {
+          // const castResponse = await axios.get(
+          //   `https://imdb-api.com/en/API/FullCast/k_3at9681x/${id}`
+          // );
+          const wikiResponse = await axios.get(
+            `https://imdb-api.com/en/API/Wikipedia/k_3at9681x/${id}`
+          );
+
+          // this.itemDetail.director = castResponse.data.directors.items[0].name;
+          // this.itemDetail.writer = castResponse.data.writers.items[0].name;
+          // this.itemDetail.actors = castResponse.data.actors
+          //   .slice(0, 5)
+          //   .map((v: { name: string }) => {
+          //     return v.name;
+          //   });
+
+          // console.log(this.itemDetail.actors);
+
+          this.itemDetail.wiki = wikiResponse.data.plotShort.plainText.substring(
+            0,
+            600
+          );
+          this.itemDetail.poster = poster;
+        };
+        getFullInfo();
+      }
     },
   },
 });
@@ -166,5 +204,35 @@ export default defineComponent({
   font-size: 18px;
   margin: 16px 0;
   color: white;
+}
+
+.modalDisplay {
+  display: block;
+  animation: fadeIn ease 0.8s;
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+}
+
+.modalClose {
+  display: none;
+}
+
+@keyframes fadeIn {
+  0% {
+    bottom: -300px
+  }
+  100% {
+    bottom: 0;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    bottom: 0px
+  }
+  100% {
+    bottom: -300px;
+  }
 }
 </style>
