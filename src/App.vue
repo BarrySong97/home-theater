@@ -1,5 +1,5 @@
 <template>
-  <div @click="() => bottomPopupOpen = !bottomPopupOpen">
+  <div @click="() => (bottomPopupOpen = false)">
     <navbar />
 
     <main class="container mx-auto flex justify-center pl-8 pr-8 pt-16">
@@ -10,7 +10,7 @@
           </p>
           <popular-list>
             <item-card
-              @click="onClick(column.id, column.image, `series`)"
+              @click.stop="onClick(column.id, column.image, `series`, $event)"
               v-for="column in seriesList"
               :key="column.id"
               :id="column.id"
@@ -43,7 +43,7 @@
           </p>
           <popular-list>
             <item-card
-              @click="onClick(column.id, column.image, `anime`)"
+              @click.stop="onClick(column.id, column.image, `anime`, $event)"
               v-for="column in animesList"
               :key="column.id"
               :id="column.id"
@@ -56,19 +56,19 @@
         </div>
       </div>
     </main>
-    <div
-      :class="{ modalDisplay: bottomPopupOpen, modalClose: !bottomPopupOpen }"
-      class="w-full"
-    >
-      <bottom-popup
-        :director="itemDetail.director"
-        :writer="itemDetail.writer"
-        :actors="itemDetail.actors"
-        :poster="itemDetail.poster"
-        :title="itemDetail.title"
-        :wiki="itemDetail.wiki"
-      />
-    </div>
+  </div>
+  <div
+    :class="{ modalDisplay: bottomPopupOpen, modalClose: !bottomPopupOpen }"
+    class="w-full"
+  >
+    <bottom-popup
+      :director="itemDetail.director"
+      :writer="itemDetail.writer"
+      :actors="itemDetail.actors"
+      :poster="itemDetail.poster"
+      :title="itemDetail.title"
+      :wiki="itemDetail.wiki"
+    />
   </div>
 </template>
 
@@ -145,7 +145,7 @@ export default defineComponent({
     };
   },
   methods: {
-    onClick(id: string, poster: string, type: string) {
+    onClick(id: string, poster: string, type: string, event: Event) {
       if (type === "anime") {
         const getFullInfo = async () => {
           const fullResponse = await axios.get(
@@ -157,6 +157,7 @@ export default defineComponent({
           this.bottomPopupOpen = true;
         };
         getFullInfo();
+        this.bottomPopupOpen = true;
       } else {
         const getFullInfo = async () => {
           // const castResponse = await axios.get(
@@ -183,6 +184,7 @@ export default defineComponent({
           this.itemDetail.poster = poster;
         };
         getFullInfo();
+        this.bottomPopupOpen = true;
       }
     },
   },
@@ -208,31 +210,16 @@ export default defineComponent({
 
 .modalDisplay {
   display: block;
-  animation: fadeIn ease 0.8s;
-  position: absolute;
-  z-index: 1;
-  bottom: 0;
+  position: fixed;
+  z-index: 10;
+  transform: translate(0, -550px);
+  transition: transform 0.8s cubic-bezier(0.37, 0.75, 0.61, 1.05);
 }
 
 .modalClose {
-  display: none;
-}
-
-@keyframes fadeIn {
-  0% {
-    bottom: -300px
-  }
-  100% {
-    bottom: 0;
-  }
-}
-
-@keyframes fadeOut {
-  0% {
-    bottom: 0px
-  }
-  100% {
-    bottom: -300px;
-  }
+  z-index: 10;
+   position: fixed;
+  transform: translate(0, 300px);
+  transition: transform 0.8s cubic-bezier(0.37, 0.75, 0.61, 1.05);
 }
 </style>
