@@ -2,47 +2,21 @@
   <div class="bottomPopup flex flex-1 w-full justify-start flex-row p-8 bg-gray-800">
     <img :src="poster" class="poster" alt="" />
     <div class="detail flex flex-col ml-4 text-white">
-      <!-- <div class="stuff flex flex-row justify-start text-left">
-        <div class="flex flex-col">
-          <div>
-            <div class="director mb-2">Director: {{ director }}</div>
-            <div class="writer mb-2">Writer: {{ writer }}</div>
-          </div>
-
-          <div class="actors mb-2">
-            Actors:
-            <span v-for="a in actors" :key="a">{{ a }}</span>
-          </div>
-        </div>
-      </div> -->
-
       <div class="wiki w-8/12 text-white flex flex-col justify-between">
-        <p class="text-left">
+        <p class="text-left text-justify">
           {{ wiki }}
         </p>
-        <button class="bg-purple-800 block w-28 focus:outline-none rounded-full py-3 px-6">查看详情</button>
+        <button @click.prevent="onClick(id)" class="bg-purple-800 block w-28 focus:outline-none rounded-full py-3 px-6">查看详情</button>
       </div>
     </div>
   </div>
 </template>
 
 <script  lang="ts">
-import { defineComponent, PropType, toRefs } from "vue";
+import { defineComponent } from "vue";
 export default defineComponent({
   name: "bottomPopup",
   props: {
-    director: {
-      type: String,
-      required: true,
-    },
-    writer: {
-      type: String,
-      required: true,
-    },
-    actors: {
-      type: Array as PropType<string[]>,
-      required: true,
-    },
     poster: {
       type: String,
       required: true,
@@ -55,7 +29,16 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    id: {
+      type: String,
+      reuqired: true
+    }
   },
+  methods: {
+    onClick(id: string) {
+      this.$router.push(`/filmDetail/${id}`)
+    }
+  }
 });
 </script>
 

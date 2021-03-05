@@ -61,7 +61,7 @@ export default defineComponent({
 }
 
 .card:hover .full-title {
-  transform: translateY(120px);
+  transform: translateY(100px);
   z-index: 1;
   color: white;
 }
