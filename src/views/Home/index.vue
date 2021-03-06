@@ -1,7 +1,7 @@
 <template>
   <div>
     <div @click="() => (bottomPopupOpen = false)">
-      <main class="container mx-auto flex justify-center pl-8 pr-8 ">
+      <main class="container mx-auto flex justify-center pl-8 pr-8">
         <div>
           <div class="mb-14">
             <p class="list-title flex justify-start font-bold">
@@ -26,6 +26,7 @@
             </p>
             <popular-list>
               <item-card
+                @click.stop="onClick(column.id, column.image, `series`)"
                 v-for="column in moivesList"
                 :key="column.id"
                 :id="column.id"
@@ -42,7 +43,7 @@
             </p>
             <popular-list>
               <item-card
-                @click.stop="onClick(column.id, column.image, `anime`, $event)"
+                @click.stop="onClick(column.id, column.image, `anime`)"
                 v-for="column in animesList"
                 :key="column.id"
                 :id="column.id"
@@ -72,11 +73,18 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from "vue";
-import axios from "axios";
-import PopularList, { PopularListProps } from "../components/PopularList.vue";
-import ItemCard from "../components/ItemCard.vue";
-import BottomPopup from "../components/BottomPopup.vue";
-
+import PopularList, {
+  PopularListProps,
+} from "../../components/PopularList.vue";
+import ItemCard from "../../components/ItemCard.vue";
+import BottomPopup from "../../components/BottomPopup.vue";
+import {
+  getNowPopularTVs,
+  getNowPopularMovies,
+  getNowPopularAnime,
+  getAnimeWikiById,
+  getSeriesOrMoiveWikiById,
+} from "./api";
 interface ItemDetail {
   poster: string;
   title: string;
@@ -98,7 +106,7 @@ export default defineComponent({
         title: "",
         wiki: "",
         id: "",
-        type: "series"
+        type: "series",
       } as ItemDetail,
       bottomPopupOpen: false,
     };
@@ -108,17 +116,10 @@ export default defineComponent({
     const popularMoives = ref<PopularListProps[]>([]);
     const popularAnimes = ref<PopularListProps[]>([]);
     const getPopular = async () => {
-      const seriesResponse = await axios.get(
-        "https://imdb-api.com/en/API/MostPopularTVs/k_3at9681x"
-      );
-      const moivesResponse = await axios.get(
-        "https://imdb-api.com/en/API/MostPopularMovies/k_3at9681x"
-      );
-      const animeResponse = await axios.get(
-        "https://api.jikan.moe/v3/top/anime/1/airing"
-      );
+      const seriesResponse = await getNowPopularTVs();
+      const moivesResponse = await getNowPopularMovies();
+      const animeResponse = await getNowPopularAnime();
       popularSeries.value = seriesResponse.data.items.slice(0, 8);
-
       popularMoives.value = moivesResponse.data.items.slice(0, 8);
       popularAnimes.value = animeResponse.data.top
         .slice(0, 8)
@@ -142,9 +143,7 @@ export default defineComponent({
     onClick(id: string, poster: string, type: string) {
       if (type === "anime") {
         const getFullInfo = async () => {
-          const fullResponse = await axios.get(
-            `https://api.jikan.moe/v3/anime/${id}`
-          );
+          const fullResponse = await getAnimeWikiById(id);
 
           this.itemDetail.wiki = fullResponse.data.synopsis.substring(0, 800);
           this.itemDetail.poster = poster;
@@ -159,9 +158,7 @@ export default defineComponent({
           // const castResponse = await axios.get(
           //   `https://imdb-api.com/en/API/FullCast/k_3at9681x/${id}`
           // );
-          const wikiResponse = await axios.get(
-            `https://imdb-api.com/en/API/Wikipedia/k_3at9681x/${id}`
-          );
+          const wikiResponse = await getSeriesOrMoiveWikiById(id);
 
           // this.itemDetail.director = castResponse.data.directors.items[0].name;
           // this.itemDetail.writer = castResponse.data.writers.items[0].name;

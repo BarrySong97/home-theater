@@ -1,52 +1,18 @@
 <template>
   <div>
     <navbar />
-    <router-view class="pt-16"/>
-    <footer
-      class="h-60 block text-white text-1xl flex justify-center p-10"
-    >
-    <div class="flex flex-row justify-even">
-        <div class="item social mr-20 text-left ">
-        <h3 class="mb-2 font-bold">
-          <span>Developer social media</span>
-        </h3>
-        <p class="github mb-2">
-          <a>Github</a>
-        </p>
-        <p class="weibo mb-2">
-          <a>Weibo</a>
-        </p>
-        <p class="juejin mb-2">
-          <a>Juejin</a>
-        </p>
-        <p class="zhihu mb-2">
-          <a>Juejin</a>
-        </p>
+    <router-view class="pt-16" />
+    <footer class="h-60 block text-white text-1xl flex justify-center p-10">
+      <div class="flex flex-row justify-even">
+        <div v-for="item in footerItems" :key="item.title" class="item social mr-20 text-left">
+          <h3 class="mb-2 font-bold">
+            <span>{{item.title}}</span>
+          </h3>
+          <p class="mb-2" v-for="v in item.items" :key="v.name">
+            <a :href="v.url" target="_blank">{{v.name}}</a>
+          </p>
+        </div>
       </div>
-      <div class="item third-api mr-20 text-left">
-         <h3 class="mb-2 font-bold">
-           <span>Third party Api</span>
-        </h3>
-        <p class="mb-2">
-          <a>Jikan</a>
-        </p>
-        <p class="mb-2">
-          <a>Imdb-Api</a>
-        </p>
-      </div>
-      <div class="library mr-20 text-left">
-        <h3 class="mb-2 font-bold">
-          <span>Used third library</span>
-        </h3>
-        <p class="mb-2">
-          <a>Vue3 family</a>
-        </p>
-        <p class="mb-2">
-          <a>Tailwind</a>
-        </p>
-      </div>
-    </div>
-    
     </footer>
   </div>
 </template>
@@ -54,9 +20,54 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import Navbar from "./components/Navbar.vue";
-
+const items = [
+  {
+    title: "Developer social media",
+    items: [
+      {
+        name: "Github",
+        url: "https://github.com/BarrySong97",
+      },
+      {
+        name: "Juejin",
+        url: "https://juejin.cn/user/2049145406506856",
+      },
+    ],
+  },
+  {
+    title: "Third party Api",
+    items: [
+      {
+        name: "Jikan",
+        url: "https://jikan.moe/",
+      },
+      {
+        name: "Imdb-Api",
+        url: "https://jikan.moe/",
+      },
+    ],
+  },
+  {
+    title: "Used third library",
+    items: [
+      {
+        name: "Vue family",
+        url: "",
+      },
+      {
+        name: "Tailwind",
+        url: "",
+      },
+    ],
+  },
+];
 export default defineComponent({
   name: "App",
+  data() {
+    return {
+      footerItems: items
+    }
+  },
   components: {
     Navbar,
   },
