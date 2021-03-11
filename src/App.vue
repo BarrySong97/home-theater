@@ -1,15 +1,23 @@
 <template>
   <div>
     <navbar />
-    <router-view class="pt-16" />
+    <router-view class="pt-16" v-slot="{ Component }">
+      <suspense>
+        <component :is="Component" />
+      </suspense>
+    </router-view>
     <footer class="h-60 block text-white text-1xl flex justify-center p-10">
       <div class="flex flex-row justify-even">
-        <div v-for="item in footerItems" :key="item.title" class="item social mr-20 text-left">
+        <div
+          v-for="item in footerItems"
+          :key="item.title"
+          class="item social mr-20 text-left"
+        >
           <h3 class="mb-2 font-bold">
-            <span>{{item.title}}</span>
+            <span>{{ item.title }}</span>
           </h3>
           <p class="mb-2" v-for="v in item.items" :key="v.name">
-            <a :href="v.url" target="_blank">{{v.name}}</a>
+            <a :href="v.url" target="_blank">{{ v.name }}</a>
           </p>
         </div>
       </div>
@@ -65,8 +73,8 @@ export default defineComponent({
   name: "App",
   data() {
     return {
-      footerItems: items
-    }
+      footerItems: items,
+    };
   },
   components: {
     Navbar,
